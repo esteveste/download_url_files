@@ -1,0 +1,49 @@
+#!/usr/bin/python
+"""
+Programa q tem objectivo receber um site e conforme o argumento
+faz download de todos os ficheiros em q o link acaba no argumento
+"""
+from bs4 import BeautifulSoup
+import urllib
+import time
+import requests
+import os
+import sys
+
+
+def download_urls(url, arg):
+
+    # get the html
+    html = requests.get(url).text
+    # parse the html
+    soup = BeautifulSoup(html, "html.parser")
+    # find the all a class
+    content_div = soup.find_all("a")
+
+    for el in content_div:
+        href = el.get("href")
+        # 1 arg if not Null
+        if(href and len(arg) < len(href) and href[-len(arg):] == arg):
+            # preparing href for wget
+            if(href[:4] == "http"):
+                # if contains http/https keeps the link intact
+                pass
+            elif(href[:2] == "//"):
+                # in case doesnt have the http: but //
+                href = href[2:]
+            elif(href[0] != '/'):
+                # if doesnt begin with /, add url
+                if(url[-1] == '/'):
+                    href = url + href
+                else:
+                    href = url + '/' + href
+
+            os.system("wget " + href)
+
+
+if __name__ == "__main__":
+    try:
+        _, url, arg = sys.argv
+        download_urls(url, arg)
+    except:
+        raise TypeError("Arguments: [url] [arg]")
